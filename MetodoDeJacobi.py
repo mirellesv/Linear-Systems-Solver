@@ -26,7 +26,72 @@ def jacobi(A, b, x0, tol, iteracoes):
         if(erro < tol): # Teste que verifica se o erro é menor que a tolerância
             return x
         xant = np.copy(x) # A solução atual é copiada ao passar a ser a anterior para a próxima iteração
-mat = []
+
+# A linha pivô em M é procurada na coluna col a partir da linha lin
+def linha_pivo(mat, lin, col):
+    maior = abs(M[lin, col]) # O primeiro elemento é o maior valor
+    
+    lin_pivo = lin # Linha pivô é a linha do primeiro elemento
+    
+    n = len(M) # n corresponde ao número de linhas de M
+    
+    for i in range(lin, n): # A coluna col é percorrida a partir de lin
+        if abs(M[i, col]) > maior:
+            maior = abs(M[i, col]) # O pivô é atualizado
+            lin_pivo = i
+    return lin_pivo
+    
+# lin1 é trocada com lin2 em M
+def troca_linha(M, lin1, lin2):
+    if lin1 != lin2: # As duas linhas são diferentes?
+        print('Troca de linhas: ', lin1, '<->', lin2)
+        aux = np.copy(M[lin1, :])
+        M[lin1, :] = np.copy(M[lin2, :])
+        M[lin2, :] = aux
+        print(M)
+        
+# A matriz M no formato de diagonal superior é resolvida
+def resolve_diag_sup(M):
+    n = len(M) # n corresponde ao número de linhas de M
+        
+    b = np.copy(M[:, n]) # b é o vetor de termos constantes
+        
+    x = np.arange(n, dtype = 'double') # Vetor x é criado para guardar a solução
+        
+    if(M[n - 1, n - 1] != 0): # Verifica se não existem zeros na diagonal principal
+                              # Se não existe, o cálculo continua
+        x[n - 1] = b[n - 1] / M[n - 1, n - 1] # A última linha já está isolada
+        
+        for i in range(n - 2, -1, -1): # As linhas são percorridas em ordem decrescente igonrando a última
+            soma = 0
+                
+            for j in range(i + 1, n): # As incógnitas já resolvidas são somadas (depois da diagonal)
+                soma += x[j] * M[i, j] # x_i = (b_i - (soma das incógnitas)) / M_i, i
+                
+                x[i] = (b[i] - soma)/ M[i, i]
+        return x
+    
+    else: # Caso exista, não há soluções para o sistema
+        print('Não há soluções para o sistema, dado que existem zeros na diagonal principal')
+        return ""
+
+# Eliminação gaussiana com pivotamento
+def gauss_pivo(M):
+    n = len(M) # n corresponde ao número de linhas de M
+    
+    for c in range(n - 1):
+        print('\n\nColuna', c)
+        l = linha_pivo(M, c, c)
+        troca_linha(M, l, c)
+        pivo = M[c, c]
+        for l in range(c+1, n):
+            print('\nL{l} <- L{l} - L{c} * '.format(l = l, c = c) +
+                  '{b} / {p}'.format(b = M[l, c], p = pivo))
+            M[l, :] = M[l, :] - M[c, :] * M[l, c] / pivo
+            print(M)
+
+    return resolve_diag_sup(M)
+
 M = []
 n = int(input('Informe o número de variáveis do sistema: '))
 print('Informe a matriz estendida (linha por linha)')
@@ -46,15 +111,17 @@ for l in range(n):
 M = np.array(M, dtype = 'double')
 b = np.array(b, dtype = 'double')
 
+x = gauss_pivo(M)
 
-b = np.array(b, dtype = 'double')
+print('\nSolução:')
+n = len(x)
+for i in range(n):
+    print('x{i} = {val}'.format(i = 1, val = x[i]))
 
-print(M)
-print(b)
-
+"""
 x0 = np.array([1, 1, -1], dtype = 'double')
 
 x = jacobi(M, b, x0, 0.0001, 20)
 
 print('\nSolução aproximada encontrada: ')
-print('x = ', x)
+print('x = ', x)"""
