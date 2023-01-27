@@ -89,9 +89,34 @@ def gauss_pivo(M):
                   '{b} / {p}'.format(b = M[l, c], p = pivo))
             M[l, :] = M[l, :] - M[c, :] * M[l, c] / pivo
             print(M)
+            if(l == c) and M[l][c] == 0:
+                print('Não existem soluções para o sistema!')
+                return -1
 
     return resolve_diag_sup(M)
 
+def gauss_seidel(A, b, x0, tol, iteracoes):
+    n = len(A)
+    x = np.zeros(n, dtype = 'double')
+    xant = x0
+    for k in range(iteracoes):
+        for i in range(n):
+            x[i] = b[i]
+            for j in range(i):
+                x[i] -= A[i, j] * x[j]
+            for j in range(i + 1, n):
+                x[i] -= A[i, j]*xant[j]
+            x[i] /= A[i, i]
+        erro = np.linalg.norm(x - xant, np.inf)
+        print('Iteração {k:3d}'.format(k = k+1) +
+              'x = {x}, '.format(x = np.round(x, 8)) +
+              'Erro = {e:5.8f}'.format(e = erro))
+        if(erro < tol):
+            return x
+        
+        xant = np.copy(x)
+
+mat = []
 M = []
 n = int(input('Informe o número de variáveis do sistema: '))
 print('Informe a matriz estendida (linha por linha)')
@@ -110,14 +135,21 @@ for l in range(n):
 
 M = np.array(M, dtype = 'double')
 b = np.array(b, dtype = 'double')
+mat = M
 
 x = gauss_pivo(M)
 
-print('\nSolução:')
 n = len(x)
-for i in range(n):
-    print('x{i} = {val}'.format(i = 1, val = x[i]))
 
+if(n != 0):
+    x0 = np.array([1, 1, -1], dtype = 'double')
+
+    x = gauss_seidel(mat, b, x0, 0.0001, 20)
+
+    print('\nSolução aproximada encontrada')
+    print('x = ', x)
+else:
+    print(' vazia!')
 """
 x0 = np.array([1, 1, -1], dtype = 'double')
 
