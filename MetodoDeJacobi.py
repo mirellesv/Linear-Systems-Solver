@@ -139,14 +139,27 @@ for l in range(n):
 M = np.array(M, dtype = 'double')
 b = np.array(b, dtype = 'double')
 mat = M
+mat = np.array(mat, dtype = 'double')
 
 x = gauss_pivo(mat)
+
+for l in range(n):
+    for c in range(n):
+        mat[l][c] = M[l][c]
 
 if not x is None:
     x0 = np.array([1, 1, -1], dtype = 'double')
     x = gauss_seidel(mat, b, x0, 0.0001, 20)
     print('\nSolução aproximada encontrada')
     print('x = ', x)
+    print('Cálculo do raio espectral: ')
+    D = np.diag(np.diag(mat))
+    L = np.tril(mat) - D
+    U = np.triu(mat) - D
+    T = -np.linalg.inv(L + D).dot(U)
+    C = np.linalg.inv(L + D).dot(b)
+    av, _ = np.linalg.egi(T)
+    raio_espectral = max(abs(av))
 else:
     print('Solução vazia!')
 
