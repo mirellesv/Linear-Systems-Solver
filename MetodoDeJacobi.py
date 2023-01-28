@@ -89,9 +89,12 @@ def gauss_pivo(M):
                   '{b} / {p}'.format(b = M[l, c], p = pivo))
             M[l, :] = M[l, :] - M[c, :] * M[l, c] / pivo
             print(M)
-            if(l == c) and M[l][c] == 0:
-                print('Não existem soluções para o sistema!')
-                return -1
+            
+        for l in range(n):
+            for c in range(n):
+                if(l == c) and M[l][c] == 0:
+                    print('Não existem soluções para o sistema!')
+                    return None
 
     return resolve_diag_sup(M)
 
@@ -108,8 +111,8 @@ def gauss_seidel(A, b, x0, tol, iteracoes):
                 x[i] -= A[i, j]*xant[j]
             x[i] /= A[i, i]
         erro = np.linalg.norm(x - xant, np.inf)
-        print('Iteração {k:3d}'.format(k = k+1) +
-              'x = {x}, '.format(x = np.round(x, 8)) +
+        print('Iteração {k:3d}:'.format(k = k+1) +
+              ' x = {x}, '.format(x = np.round(x, 8)) +
               'Erro = {e:5.8f}'.format(e = erro))
         if(erro < tol):
             return x
@@ -137,19 +140,16 @@ M = np.array(M, dtype = 'double')
 b = np.array(b, dtype = 'double')
 mat = M
 
-x = gauss_pivo(M)
+x = gauss_pivo(mat)
 
-n = len(x)
-
-if(n != 0):
+if not x is None:
     x0 = np.array([1, 1, -1], dtype = 'double')
-
     x = gauss_seidel(mat, b, x0, 0.0001, 20)
-
     print('\nSolução aproximada encontrada')
     print('x = ', x)
 else:
-    print(' vazia!')
+    print('Solução vazia!')
+
 """
 x0 = np.array([1, 1, -1], dtype = 'double')
 
