@@ -135,31 +135,35 @@ for l in range(n):
     for c in range(n + 1):
         if (c == n):
             b.append(M[l][c])
+            
+for l in range(n):
+    for c in range(n):
+        mat.append(M[l][c])
 
 M = np.array(M, dtype = 'double')
 b = np.array(b, dtype = 'double')
-mat = M
 mat = np.array(mat, dtype = 'double')
 
-x = gauss_pivo(mat)
+matCoef = np.array_split(mat, n)
 
-for l in range(n):
-    for c in range(n):
-        mat[l][c] = M[l][c]
+matCoef = np.array(matCoef, dtype = 'double')
+
+x = gauss_pivo(M)
 
 if not x is None:
     x0 = np.array([1, 1, -1], dtype = 'double')
-    x = gauss_seidel(mat, b, x0, 0.0001, 20)
+    x = gauss_seidel(M, b, x0, 0.0001, 20)
     print('\nSolução aproximada encontrada')
     print('x = ', x)
     print('Cálculo do raio espectral: ')
-    D = np.diag(np.diag(mat))
-    L = np.tril(mat) - D
-    U = np.triu(mat) - D
+    D = np.diag(np.diag(matCoef))
+    L = np.tril(matCoef) - D
+    U = np.triu(matCoef) - D
     T = -np.linalg.inv(L + D).dot(U)
     C = np.linalg.inv(L + D).dot(b)
-    av, _ = np.linalg.egi(T)
+    av, _ = np.linalg.eig(T)
     raio_espectral = max(abs(av))
+    print(raio_espectral)
 else:
     print('Solução vazia!')
 

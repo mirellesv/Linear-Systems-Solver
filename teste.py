@@ -32,7 +32,7 @@ M = np.array(M, dtype = 'double')
 b = np.array(b, dtype = 'double')
 mat = np.array(mat, dtype = 'double')
 
-matCoef = np.array_split(mat, 3)
+matCoef = np.array_split(mat, n)
 
 matCoef = np.array(matCoef, dtype = 'double')
 
