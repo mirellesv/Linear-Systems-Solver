@@ -2,7 +2,27 @@
 """
 Created on Fri Jan 27 10:30:24 2023
 
-@author: mirelle
+Disciplina: Cálculo Numérico
+Trabalho: Resolvedor de Sistemas Lineares
+Nome: Mirelle Silva Vieira
+RA: 0059636
+
+Objetivos:
+- O programa soluciona sistemas lineares com n variáveis e n equações, inseridas pelo usuário;
+
+- O programa solicita ao usuário todas as informações do sistema (número de variáveis, matriz estendida 
+  do sistema, tolerância e número máximo de iterações);
+
+- Após a entrada dos dados, o programa mostra o sistema para que o usuário possa conferir e confirmar se 
+  deseja prosseguir;
+
+- Depois da confirmação, o resolvedor realiza um pivotamento na matriz estendida (isto evita erros quando 
+  a diagonal principal possui zeros, isto é, quando o sistema não possui soluções).
+
+- Em seguida, o critério do raio espectral é utilizado para testar se o sistema original convergirá;
+
+- Por fim, o programa deve calcular a solução utilizando um método iterativo (Jacobi ou Gauss-Seidel),
+  inserido pelo usuário;
 """
 
 import numpy as np
@@ -114,16 +134,36 @@ def gauss_seidel(A, b, x0, tol, iteracoes):
         
         xant = np.copy(x) # Solução atual é copiada para ser a anterior na próxima iteração
 
-mat = [] # Matriz auxiliar para obter a matriz dos coeficientes
-M = []
-n = int(input('Informe o número de variáveis do sistema: '))
-print('Informe a matriz estendida (linha por linha)')
-for i in range(n): # Laço de repetição que permite a criação da matriz a partir
-                   # dos dados inseridos pelo usuário
-    lin = input('Linha {i}: '.format(i = i))
-    lin_num = lin.split(',')
-    lin_num = [float(i) for i in lin_num]
-    M.append(lin_num)
+print('-' * 30)
+print('RESOLVEDOR DE SISTEMAS LINEARES')
+print('-' * 30)
+while True:
+    mat = [] # Matriz auxiliar para obter a matriz dos coeficientes
+    M = []
+    n = int(input('Informe o número de variáveis do sistema: '))
+    print('Informe a matriz estendida (linha por linha)')
+    for i in range(n): # Laço de repetição que permite a criação da matriz a partir
+                       # dos dados inseridos pelo usuário
+        lin = input('Linha {i}: '.format(i = i))
+        lin_num = lin.split(',')
+        lin_num = [float(i) for i in lin_num]
+        M.append(lin_num)
+    
+    tol = float(input('Informe a tolerância: '))
+    iteracoes = int(input('Informe o número máximo de iterações: '))
+    
+    print('-' * 30)
+    
+    print('Número de variáveis do sistema: ', n)
+    print('Matriz estendida inserida: ')
+    for l in range(n):
+        print(M[l])
+    print('Tolerância: ', tol)
+    print('Número máximo de iterações:', iteracoes)
+    resp = input('Deseja continuar (S/N)?')
+    
+    if(resp.lower() == 's'):
+        break
 
 b = [] # b corresponde a matriz dos termos independentes
 
@@ -148,30 +188,61 @@ matCoef = np.array(matCoef, dtype = 'double')
 x = gauss_pivo(M) # Escalonamento da matriz
 
 print()
-if not x is None: # Se não existir zeros na diagonal principal ...
-    print('Cálculo do raio espectral: ', end = '')
-    D = np.diag(np.diag(matCoef))
-    L = np.tril(matCoef) - D
-    U = np.triu(matCoef) - D
-    T = -np.linalg.inv(L + D).dot(U)
-    C = np.linalg.inv(L + D).dot(b)
-    av, _ = np.linalg.eig(T)
-    raio_espectral = max(abs(av))
-    print(raio_espectral)
-    if(raio_espectral <= 1):
-        print('Raio espectral inferior ou igual a 1. Logo, o método Gauss-Seidel converge.')
+if not x is None: # Se não existirem zeros na diagonal principal ...
+    print('Não existem zeros na diagonal principal. Logo, o sistema possui solução.')
+    print('1. Método de Jacobi')
+    print('2. Método de Gauss-Seidel')
+    op = int(input('Selecione o método iterativo desejado: '))
+    if(op == 1):
         print()
-        x0_list = [] # Lista que irá armazenar os valores iniciais para todas as variáveis
-        for i in range(n):
-            x0_list.append(0) # Todas as variáveis utilizarão zero como valor inicial
-        x0 = np.array(x0_list, dtype = 'double')
-        x = gauss_seidel(matCoef, b, x0, 0.00001, 30)
-        if not x is None: # Se o número de iterações for suficiente...
-            print('\nSolução aproximada encontrada')
-            print('x = ', x)
+        print('Cálculo do raio espectral: ', end = '')
+        D = np.diag(np.diag(matCoef))
+        L = np.tril(matCoef) - D
+        U = np.triu(matCoef) - D
+        T = -np.linalg.inv(D).dot(L + U)
+        C = np.linalg.inv(D).dot(b)
+        av, _ = np.linalg.eig(T)
+        raio_espectral = max(abs(av))
+        print(raio_espectral)
+        if(raio_espectral <= 1):
+            print('Raio espectral inferior ou igual a 1. Logo, o método Jacobi converge.')
+            print()
+            x0_list = [] # Lista que irá armazenar os valores iniciais para todas as variáveis
+            for i in range(n):
+                x0_list.append(0) # Todas as variáveis utilizarão zero como valor inicial
+            x0 = np.array(x0_list, dtype = 'double')
+            x = jacobi(matCoef, b, x0, tol, iteracoes)
+            if not x is None: # Se o número de iterações for suficiente...
+                print('\nSolução aproximada encontrada')
+                print('x = ', x)
+            else:
+                print(iteracoes, 'iterações não foram suficientes para encontrar as soluções!')
         else:
-            print('30 iterações não foram suficientes para encontrar as soluções!')
-    else:
-        print('Raio espectral superior a 1. Logo, o método Gauss-Seidel não converge.')
+            print('Raio espectral superior a 1. Logo, o método Jacobi não converge.')
+    elif(op == 2):
+        print('Cálculo do raio espectral: ', end = '')
+        D = np.diag(np.diag(matCoef))
+        L = np.tril(matCoef) - D
+        U = np.triu(matCoef) - D
+        T = -np.linalg.inv(L + D).dot(U)
+        C = np.linalg.inv(L + D).dot(b)
+        av, _ = np.linalg.eig(T)
+        raio_espectral = max(abs(av))
+        print(raio_espectral)
+        if(raio_espectral <= 1):
+            print('Raio espectral inferior ou igual a 1. Logo, o método Gauss-Seidel converge.')
+            print()
+            x0_list = [] # Lista que irá armazenar os valores iniciais para todas as variáveis
+            for i in range(n):
+                x0_list.append(0) # Todas as variáveis utilizarão zero como valor inicial
+            x0 = np.array(x0_list, dtype = 'double')
+            x = gauss_seidel(matCoef, b, x0, tol, iteracoes)
+            if not x is None: # Se o número de iterações for suficiente...
+                print('\nSolução aproximada encontrada')
+                print('x = ', x)
+            else:
+                print(iteracoes, 'iterações não foram suficientes para encontrar as soluções!')
+        else:
+            print('Raio espectral superior a 1. Logo, o método Gauss-Seidel não converge.')
 else:
     print('Solução vazia!')
