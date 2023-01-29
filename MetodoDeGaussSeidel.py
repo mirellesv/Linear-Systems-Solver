@@ -153,8 +153,8 @@ if not x is None: # Se não existir zeros na diagonal principal ...
     D = np.diag(np.diag(matCoef))
     L = np.tril(matCoef) - D
     U = np.triu(matCoef) - D
-    T = -np.linalg.inv(D).dot(L + U)
-    C = np.linalg.inv(D).dot(b)
+    T = -np.linalg.inv(L + D).dot(U)
+    C = np.linalg.inv(L + D).dot(b)
     av, _ = np.linalg.eig(T)
     raio_espectral = max(abs(av))
     print(raio_espectral)
@@ -165,7 +165,7 @@ if not x is None: # Se não existir zeros na diagonal principal ...
         for i in range(n):
             x0_list.append(0) # Todas as variáveis utilizarão zero como valor inicial
         x0 = np.array(x0_list, dtype = 'double')
-        x = jacobi(matCoef, b, x0, 0.00001, 30)
+        x = gauss_seidel(matCoef, b, x0, 0.00001, 30)
         if not x is None: # Se o número de iterações for suficiente...
             print('\nSolução aproximada encontrada')
             print('x = ', x)
