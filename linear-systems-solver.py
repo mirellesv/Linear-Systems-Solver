@@ -8,7 +8,7 @@ Nome: Mirelle Silva Vieira
 RA: 0059636
 
 Objetivos:
-- O programa soluciona sistemas lineares com n variáveis e n equações, inseridas pelo usuário;
+- O programa soluciona sistemas lineares com n variáveis e n equações, inseridos pelo usuário;
 
 - O programa solicita ao usuário todas as informações do sistema (número de variáveis, matriz estendida 
   do sistema, tolerância e número máximo de iterações);
